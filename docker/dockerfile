@@ -1,0 +1,51 @@
+# FROM ubuntu:18.04 as builder
+FROM docker.io/tensorflow/serving:1.15.0
+
+#替换 apt-get 源
+RUN sed -i 's/http:\/\/archive\.ubuntu\.com\/ubuntu\//http:\/\/mirrors\.aliyun\.com\/ubuntu\//g' /etc/apt/sources.list \
+&& sed -i 's/http:\/\/security\.ubuntu\.com\/ubuntu\//http:\/\/mirrors\.aliyun\.com\/ubuntu\//g' /etc/apt/sources.list \
+&& apt-get update
+
+RUN export DEBIAN_FRONTEND=noninteractive \
+&& apt-get install -y cmake build-essential python python-dev python-pip libopencv-dev python-opencv python-psycopg2
+
+COPY app/requirements.txt /builddeps/
+
+RUN cd /builddeps/ && pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+# && pip install flask_api==1.1 pyyaml pillow sklearn tensorflow-serving-api==1.4.0 scikit-image -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+COPY app /home/app
+COPY SeetaFace2 /builddeps/SeetaFace2
+
+# build seetaface2 engine
+RUN cd /builddeps/SeetaFace2 \
+    && mkdir build && cd build \
+    && cmake  -DCMAKE_INSTALL_PREFIX=/seetaface2/install -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLE=OFF .. \
+    && cmake --build . --config Release --target install
+
+# build seetaface2 python wrapper
+RUN cd /builddeps/SeetaFace2/python && mkdir -p build \
+    && cd build \
+    && cmake -DSeetaFace_DIR=/seetaface2/install/lib/cmake -DCMAKE_INSTALL_PREFIX=/home/SeetaFace2 .. \
+    && mv /builddeps/SeetaFace2/python/resource/boost_1_70_0.tar.bz2 /builddeps/SeetaFace2/python/build/Boost/src \
+    && make seetafacelib \
+    && mv seetafacelib.so /seetaface2/install/bin
+
+RUN mkdir /seetaface2/models && cp /builddeps/SeetaFace2/python/resource/*.dat /seetaface2/models
+
+RUN rm -rf /builddeps
+
+FROM scratch
+COPY --from=0 / /
+
+ENV PYTHONPATH "/seetaface2/install/bin:${PYTHONPATH}"
+ENV LD_LIBRARY_PATH "/seetaface2/install/bin:${LD_LIBRARY_PATH}"
+
+WORKDIR /home/app
+
+# CMD ["python",  "app.py"]
+
+ENV TF_SERVING_PORT 8500
+
+ENTRYPOINT [""]
+

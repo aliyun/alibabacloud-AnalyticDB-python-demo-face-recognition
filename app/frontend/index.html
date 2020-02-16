@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>AnalyticDB人脸门禁演示</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #videoElement {
+            width: 640px;
+            height: 360px;
+            background-color: #666;
+            display: none;
+        }
+
+        #canvasElement {
+            width: 640px;
+            height: 360px;
+            display: none;
+        }
+
+        #canvasElement2 {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+
+</head>
+
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">AnalyticDB人口管理演示</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="index.html">主页
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="register.html">人员登记</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="management.html">后台管理</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="logout">登出</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Page Content -->
+<div class="container">
+    <div class="row justify-content-md-center">
+        <div class="col-lg-8 col-sm-8 portfolio-item">
+            <div class="card h-100">
+                <h4 class="card-header text-center"></h4>
+                <canvas id="canvasElement2">人脸门禁</canvas>
+                <div class="card-body text-center">
+                    <tag id="heading_message"></tag>
+                </div>
+                <tag id="record_message_head"></tag>
+                <br>
+                <tag id="record_message"></tag>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<video autoplay="true" id="videoElement"></video>
+<canvas id="canvasElement"></canvas>
+
+
+<!-- Bootstrap core JavaScript -->
+<script src="vendor/jquery/jquery.slim.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="static/js/main.js"></script>
+
+</body>
+
+</html>

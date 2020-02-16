@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta content="ugh, hi." name="description">
+        <meta content="人脸门禁演示" name="title">
+        <title>Makeup Webcam</title>
+        <style>
+         #container {
+             margin: 0px auto;
+             border: 10px #333 solid;
+         }
+         #videoElement {
+             width: 640px;
+             height: 480px;
+             background-color: #666;
+             {#display: none;#}
+         }
+
+         #imageElement {
+             width: 640px;
+             height: 480px;
+             background-color: #666;
+         }
+
+         #canvasElement {
+             width: 640px;
+             height: 480px;
+             display: none;
+         }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <video autoplay="true" id="videoElement">
+            </video>
+            <img id="imageElement" src="{{ url_for('video_feed') }}">
+            <canvas id="canvasElement"></canvas>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    </body>
+</html>

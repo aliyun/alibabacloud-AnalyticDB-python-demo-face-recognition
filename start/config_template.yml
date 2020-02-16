@@ -1,0 +1,17 @@
+database_config:
+  database: postgres
+  host: xx.xx.xx.xx
+  password: xxxx
+  port: '5432'
+  user: postgres
+face_engine_config:
+  dist_thre: 0.8
+  dist_measure: squared_l2
+  image_height: 480
+  image_width: 640
+  model_dir: /seetaface2/models
+service_config:
+  ip: 0.0.0.0
+  port: 8000
+
+

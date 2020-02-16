@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>AnalyticDB人脸门禁演示</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body onload="get_record()">
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">AnalyticDB人口管理演示</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">主页
+                      <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="register.html">人员登记
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="management.html">后台管理</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="logout">登出</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Page Content -->
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 mb-4">
+            <div class="row mb-4">
+                <div class="card h-100 w-100">
+                    <div class="text-center">
+                        <h5 class="card-header">查询来访记录</h5>
+                    </div>
+                    <div class="card-body justify-content-center">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-5 mb-4">
+                                <video id="v" style="width: 100%;height: 100%; border: 2px solid lightgrey;"></video>
+                            </div>
+                            <div class="col-lg-5 mb-4 col-md-offset-2">
+                                <canvas id="canvas"
+                                        style="width: 100%;height: 100%; border: 2px solid lightgrey;
+                                        background: url('http://placehold.it/320x240&text=Your%20image%20here%20...')">
+                                </canvas>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button id="take" class="btn btn-primary">拍照</button>
+                        </div>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="photo" name="photo" onchange="image_show(this);">
+                            <label class="custom-file-label" id="photo_label" for="customFile">选择文件</label>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <form id='image_capture_upload'onsubmit="return image_capture_upload();">
+                            <div class="input-group">
+                                <input class="form-control" id="name1" name="name" placeholder="姓名"
+                                       style="margin-right:10px"/>
+                                <input class="form-control" placeholder="性别" name="gender" style="margin-right:10px;"/>
+                                <input class="form-control" placeholder="年龄" name="age" style="margin-right:10px;"/>
+                            </div>
+                            <div class="input-group">
+                                <input class="form-control" placeholder="查询开始时间" name="begin" style="margin-right:10px;"/>
+                                <input class="form-control" placeholder="查询结束时间" name="end" style="margin-right:10px;"/>
+                                <span class="input-group-btn">
+                                    <input type="button" class="btn btn-primary" value="查询记录"
+                                           onclick="record_query() ;"/>
+                                </span>
+                            </div>
+                            <span id="show"></span>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+                <ul class="list-group" id="access_record">
+                    <li class="list-group-item active">来访记录</li>
+                </ul>
+            </div>
+    </div>
+    </div>
+</div>
+
+
+<!-- Bootstrap core JavaScript -->
+<script src="vendor/jquery/jquery.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+</body>
+<script>
+        $(".custom-file-input").on("change", function() {
+      var fileName = $(this).val().split("\\").pop();
+      $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+    function record_query() {
+        var form = new FormData(document.getElementById("image_capture_upload"));
+        form.append("photo", dataURItoBlob(document.getElementById("canvas").toDataURL("image/jpeg")), "photo.jpg")
+        $("#show").html("");
+        $.ajax({
+            url: './action/record_query',
+            type: "post",
+            data: form,
+            processData: false,
+            contentType: false,
+            async: false,
+            success: function (data) {
+                let e = $("#show");
+                $("#show").html(data.result);
+            },
+            error: function (e) {
+                alert("错误！！");
+            }
+        });
+    }
+    
+    function image_show(source) {
+        if (source.value === "")
+            return;
+        var file = source.files[0];
+        var img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function () {
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+            console.log(img.height);
+            console.log(img.width);
+            canvas.height = img.height;
+            canvas.width = img.width;
+            ctx.drawImage(img,0,0);
+        };
+        var fr = new FileReader();
+        fr.onloadend = function(){
+            img.src = fr.result;
+        };
+        fr.readAsDataURL(file);
+    }
+
+    function dataURItoBlob(dataURI) {
+        // convert base64/URLEncoded data component to raw binary data held in a string
+        var byteString;
+        if (dataURI.split(',')[0].indexOf('base64') >= 0)
+            byteString = atob(dataURI.split(',')[1]);
+        else
+            byteString = unescape(dataURI.split(',')[1]);
+        // separate out the mime component
+        var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+        // write the bytes of the string to a typed array
+        var ia = new Uint8Array(byteString.length);
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ia], {type: mimeString});
+    }
+
+    function get_record() {
+        var xhr = new XMLHttpRequest();
+        xhr.onload = async function () {
+            if (this.status === 200) {
+                console.log(this.response);
+                let objects = JSON.parse(this.response);
+                console.log(objects.result)
+                objects.result.forEach((element, index, array) => {
+                    console.log(element)
+                    document.getElementById('access_record').innerHTML += '<li class="list-group-item">' + element[3]
+                        + ',\t' + element[0] + ',\t' + element[1] + ',\t' + element[2] + '</li>';
+                });
+            };
+        };
+        host = window.location.host;
+        url = 'http://' + host + '/get_record'
+        xhr.open("GET", url, true);
+        xhr.send(null)
+    }
+
+    !(function () {
+        // 老的浏览器可能根本没有实现 mediaDevices，所以我们可以先设置一个空的对象
+        if (navigator.mediaDevices === undefined) {
+            navigator.mediaDevices = {};
+        }
+        if (navigator.mediaDevices.getUserMedia === undefined) {
+            navigator.mediaDevices.getUserMedia = function (constraints) {
+                // 首先，如果有getUserMedia的话，就获得它
+                var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+                // 一些浏览器根本没实现它 - 那么就返回一个error到promise的reject来保持一个统一的接口
+                if (!getUserMedia) {
+                    return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+                }
+
+                // 否则，为老的navigator.getUserMedia方法包裹一个Promise
+                return new Promise(function (resolve, reject) {
+                    getUserMedia.call(navigator, constraints, resolve, reject);
+                });
+            }
+        }
+        const constraints = {
+            video: true,
+            audio: false
+        };
+        let videoPlaying = false;
+        let v = document.getElementById('v');
+        let promise = navigator.mediaDevices.getUserMedia(constraints);
+        promise.then(stream => {
+            // 旧的浏览器可能没有srcObject
+            if ("srcObject" in v) {
+                v.srcObject = stream;
+            } else {
+                // 防止再新的浏览器里使用它，应为它已经不再支持了
+                v.src = window.URL.createObjectURL(stream);
+            }
+            v.onloadedmetadata = function (e) {
+                v.play();
+                videoPlaying = true;
+                v.style.width = v.videoWidth / 3;
+                v.style.height = v.videoHeight / 3;
+                let canvas = document.getElementById('canvas');
+                canvas.style.width = v.style.width;
+                canvas.style.height = v.style.height;
+
+            };
+        }).catch(err => {
+            console.error(err.name + ": " + err.message);
+        })
+        document.getElementById('take').addEventListener('click', function () {
+            if (videoPlaying) {
+                let photo = document.getElementById("photo");
+                photo.value = "";
+                let photo_label = document.getElementById("photo_label");
+                photo_label.innerText = "";
+                let canvas = document.getElementById('canvas');
+                console.log(canvas.width);
+                canvas.width = v.videoWidth;
+                canvas.height = v.videoHeight;
+                console.log(v.videoHeight);
+                canvas.getContext('2d').drawImage(v, 0, 0);
+            }
+        }, false);
+
+    })();
+
+</script>
+</html>
