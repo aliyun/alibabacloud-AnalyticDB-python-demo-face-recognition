@@ -2,6 +2,8 @@
 from dbinterface import DBInterfacePG
 from datetime import datetime
 import numpy as np
+import traceback
+from psycopg2 import ProgrammingError
 np.set_printoptions(threshold=np.inf)
 
 class face_database:
@@ -45,7 +47,7 @@ class face_database:
         else:
             address = "'%s'"%address
         name = "'%s'" % name
-        sql = "insert into %s.%s values(%d, %s, %s, %s, %s) ON conflict DO nothing;"%(schema, self.tb_name_person, pid, name, gender, age, address)
+        sql = "insert into %s.%s values(%d, %s, %s, %s, %s);"%(schema, self.tb_name_person, pid, name, gender, age, address)
         self.db.sql_worker(sql, not_fetch_result=True, is_print=False)
         return True
 
@@ -73,7 +75,7 @@ class face_database:
         else:
             address = "'%s'"%address
         name = "'%s'" % name
-        sql = "insert into %s.%s values(%d, %s, %s, %s, %s) ON conflict DO nothing;"%(schema, self.tb_name_person, pid, name, gender, age, address)
+        sql = "insert into %s.%s values(%d, %s, %s, %s, %s);"%(schema, self.tb_name_person, pid, name, gender, age, address)
         self.db.sql_worker(sql, not_fetch_result=True, is_print=False)
         return True
 
@@ -123,8 +125,12 @@ class face_database:
     def create_table(self, schema=None):
         if schema is not None:
             # create a table for features
-            sql = "create sequence if not exists %s.seq_pid as bigint" %schema
-            self.db.sql_worker(sql, True, False)
+            try:
+                sql = "create sequence %s.seq_pid" %schema
+                self.db.sql_worker(sql, True, False)
+            except ProgrammingError:
+                pass
+
             sql = """create table if not exists %s.%s (
                         id bigint default nextval('%s.seq_pid') primary key,
                         pid bigint,
@@ -133,13 +139,20 @@ class face_database:
                     )""" \
                     %(schema,  self.tb_name, schema,  self.feature_length,  self.feature_length)
             self.db.sql_worker(sql, True, False)
-            sql = "create index if not exists %s_idx on %s.%s using ann(feature) with(distancemeasure=L2,dim=%d,pq_segments=128)"\
+            try:
+                sql = "create index %s_idx on %s.%s using ann(feature) with(distancemeasure=L2,dim=%d,pq_segments=128)"\
                   %(self.tb_name, schema, self.tb_name, self.feature_length)
-            self.db.sql_worker(sql, True, False)
+                self.db.sql_worker(sql, True, False)
+            except ProgrammingError:
+                pass
 
             # create table for visiting records
-            sql = "create sequence if not exists %s.seq_id as bigint" %schema
-            self.db.sql_worker(sql, True, False)
+            try:
+                sql = "create sequence %s.seq_id" %schema
+                self.db.sql_worker(sql, True, False)
+            except ProgrammingError:
+                pass
+
             sql = """create table if not exists %s.%s (
                         id bigint default nextval('%s.seq_id') primary key,
                         pid bigint,
@@ -148,8 +161,13 @@ class face_database:
                     %(schema, self.tb_name_access, schema)
             self.db.sql_worker(sql, True, False)
 
-            sql = "create sequence if not exists %s.seq_psid as bigint" %schema
-            self.db.sql_worker(sql, True, False)
+            try:
+                sql = "create sequence %s.seq_psid" %schema
+                self.db.sql_worker(sql, True, False)
+            except Exception:
+                traceback.print_exc()
+                pass
+
             # create table for person information
             sql = """create table if not exists %s.%s (
                         pid bigint default nextval('%s.seq_id') primary key,
@@ -159,10 +177,12 @@ class face_database:
                         address VARCHAR(255)
                     )""" %(schema, self.tb_name_person, schema)
             self.db.sql_worker(sql, True, False)
-
-        # create a table for user accounts
-        sql = "create sequence if not exists user_id as bigint"
-        self.db.sql_worker(sql, True, False)
+        try:
+            # create a table for user accounts
+            sql = "create sequence user_id"
+            self.db.sql_worker(sql, True, False)
+        except ProgrammingError, err:
+            pass
         sql = """create table if not exists %s (
                     id bigint default nextval('user_id') primary key,
                     name VARCHAR (255) NOT NULL,
