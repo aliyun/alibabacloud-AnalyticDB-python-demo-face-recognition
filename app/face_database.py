@@ -123,6 +123,8 @@ class face_database:
         return rows
 
     def create_table(self, schema=None):
+        sql = "create extension if not exists fastann"
+        self.db.sql_worker(sql, True, False)
         if schema is not None:
             # create a table for features
             try:
