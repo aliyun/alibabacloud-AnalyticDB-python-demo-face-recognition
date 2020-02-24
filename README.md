@@ -34,7 +34,7 @@
 #### 生成docker镜像
 
 从[这里](https://adbvdb.oss-cn-hangzhou.aliyuncs.com/adb_face/adb_models.tar.gz
-)下载AnalyticDB模型然后解压至app/tf_serving/
+)下载AnalyticDB模型然后解压至(需要先解压) app/tf_serving/
 
 从[这里](https://github.com/seetafaceengine/SeetaFace2#4-%E6%A8%A1%E5%9E%8B%E4%B8%8B%E8%BD%BD)下载Seetaface模型fd_2_00.dat, pd_2_00_pts5.dat 摆放至 SeetaFace2/python/resource/
 
@@ -53,7 +53,7 @@ sh start.sh <image-name>
 ```
 打开chrome访问localhost:8000
 
-有问题可以加入AnalyticDB的向量团队钉钉沟通群。
+有问题可以加入AnalyticDB的向量团队钉钉沟通群, 钉钉群号:30066959.
 
 <img src="doc/DingTalkQR.png" height="256"/>
 
